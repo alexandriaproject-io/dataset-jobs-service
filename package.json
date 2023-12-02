@@ -8,7 +8,7 @@
     "start": "ts-node -r tsconfig-paths/register ./src/app.ts --trace-warnings",
     "start:lite": "ts-node -r tsconfig-paths/register ./src/app.ts --trace-warnings --transpile-only",
     "start:pod": "node build/app.js",
-    "build": "rimraf build && ttsc --build ./tsconfig.json",
+    "build": "rimraf build && ttsc --build ./tsconfig.json ",
     "build:test": "rimraf build && ttsc --build ./tsconfig.json && rimraf build",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
@@ -44,7 +44,7 @@
     "prettier": "^2.2.1",
     "ts-node": "^10.1.0",
     "tsconfig-paths": "^3.9.0",
-    "ttypescript": "^1.5.12",
+    "ttypescript": "^1.5.15",
     "typescript": "^4.3.5",
     "typescript-transform-paths": "^3.1.0"
   },
