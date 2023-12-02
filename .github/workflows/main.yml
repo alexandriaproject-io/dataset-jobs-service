@@ -22,7 +22,7 @@ jobs:
       - name: Build and push Docker image
         working-directory: .
         env:
-          IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
         run: |
           docker build --network host -t "$IMAGE_NAME" .
           docker push $IMAGE_NAME
@@ -35,6 +35,6 @@ jobs:
         uses: azure/setup-kubectl@v3
       - name: Update Deployment Image
         env:
-          IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
         run: |
           kubectl set image deployment/${{ vars.SERVICE_NAME }} ${{ vars.SERVICE_NAME }}=$IMAGE_NAME -n services
