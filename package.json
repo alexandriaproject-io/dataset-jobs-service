@@ -9,18 +9,17 @@
     "start:lite": "ts-node -r tsconfig-paths/register ./src/app.ts --trace-warnings --transpile-only",
     "start:pod": "node build/app.js",
     "build": "rimraf build && ttsc --build ./tsconfig.json",
-    "build:release": "rimraf build && ttsc --build ./tsconfig.release.json",
     "build:test": "rimraf build && ttsc --build ./tsconfig.json && rimraf build",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/gamer-guard-io/service-boilerplate.git"
+    "url": "https://github.com/alexandriaproject-io/dataset-jobs-service"
   },
   "author": "niftylius",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/gamer-guard-io/service-boilerplate#readme",
+  "homepage": "https://github.com/alexandriaproject-io/dataset-jobs-service",
   "dependencies": {
     "@niftylius/simple-status-provider": "^1.0.2",
     "@types/dotenv-flow": "^3.1.1",
