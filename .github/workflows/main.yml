@@ -24,7 +24,7 @@ jobs:
         env:
           IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
         run: |
-          docker buildx build --push -t "$IMAGE_NAME" .
+          docker build --network host -t "$IMAGE_NAME" .
           docker push $IMAGE_NAME
 
   deploy:
