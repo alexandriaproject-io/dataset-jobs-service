@@ -12,29 +12,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Add SHORT_SHA
+      - name: Add SHORT_SHA to env
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-10`" >> $GITHUB_ENV
-
-      - name: Echo SHORT_SHA
-        run: echo ${{ env.SHORT_SHA }}
 
       - name: Log in to Docker Hub
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
+      - name: Build and push Docker image
+        working-directory: .
+        env:
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ env.SHORT_SHA }}
+        run: |
+          docker build --network host -t "$IMAGE_NAME" .
 
-  #      - name: Build and push Docker image
-  #        working-directory: .
-  #        env:
-  #          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ env.COMMIT_SHORT_SHA }}
-  #        run: |
-  #          docker build --network host -t "$IMAGE_NAME" .
-  #
-  #      - name: Docker push
-  #        working-directory: .
-  #        env:
-  #          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
-  #        run: |
-  #          docker push $IMAGE_NAME
+      - name: Docker push
+        working-directory: .
+        env:
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ env.SHORT_SHA }}
+        run: |
+          docker push $IMAGE_NAME
 
   deploy:
     needs: docker-build-and-push
@@ -43,11 +39,8 @@ jobs:
       - name: install kubectl
         uses: azure/setup-kubectl@v3
 
-      - name: Add SHORT_SHA
+      - name: Add SHORT_SHA to env
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-10`" >> $GITHUB_ENV
-
-      - name: Echo SHORT_SHA
-        run: echo ${{ env.SHORT_SHA }}
 
       - name: Update Deployment Image
         env:
