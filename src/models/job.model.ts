@@ -12,6 +12,12 @@ export enum JobTarget {
   Context = 'context',
 }
 
+export enum JobSource {
+    Messages = 'messages',
+    System = 'system',
+    Context = 'context',
+}
+
 export enum JobStatus {
   New = 'new',
   Queued = 'queued',
@@ -37,7 +43,7 @@ export interface JobInterface extends Document {
   jobHash: string;
   type: JobType;
   target: JobTarget;
-  sources: Array<JobTarget>;
+  sources: Array<JobSource>;
   status: JobStatus;
   tool: JobTool;
   completedDate: Date | null;
@@ -50,7 +56,7 @@ const jobSchema = new Schema(
     jobHash: { type: String, unique: true },
     type: { type: String, enum: Object.values(JobType) },
     target: { type: String, enum: Object.values(JobTarget) },
-    sources: [{ type: String, enum: Object.values(JobTarget) }],
+    sources: [{ type: String, enum: Object.values(JobSource) }],
     status: { type: String, default: JobStatus.New, enum: Object.values(JobStatus) },
     tool: { type: String, enum: Object.values(JobTool) },
     completedDate: { type: Date, default: null, sparse: true },
