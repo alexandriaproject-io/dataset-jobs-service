@@ -12,35 +12,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Add COMMIT_SHORT_SHA
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - name: Add SHORT_SHA
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-10`" >> $GITHUB_ENV
 
-      - name: Echo COMMIT_SHORT_SHA
-        run: echo ${{ env.COMMIT_SHORT_SHA }}
+      - name: Echo SHORT_SHA
+        run: echo ${{ env.SHORT_SHA }}
 
       - name: Log in to Docker Hub
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
-      - name: Add SHORT_SHA
-        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
-      - name: Echo SHORT_SHA
-        run: echo ${{ env.SHORT_SHA }}
-#      - name: Build and push Docker image
-#        working-directory: .
-#        env:
-#          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ env.COMMIT_SHORT_SHA }}
-#        run: |
-#          docker build --network host -t "$IMAGE_NAME" .
-#
-#      - name: Docker push
-#        working-directory: .
-#        env:
-#          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
-#        run: |
-#          docker push $IMAGE_NAME
+  #      - name: Build and push Docker image
+  #        working-directory: .
+  #        env:
+  #          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ env.COMMIT_SHORT_SHA }}
+  #        run: |
+  #          docker build --network host -t "$IMAGE_NAME" .
+  #
+  #      - name: Docker push
+  #        working-directory: .
+  #        env:
+  #          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
+  #        run: |
+  #          docker push $IMAGE_NAME
 
   deploy:
     needs: docker-build-and-push
@@ -50,13 +44,13 @@ jobs:
         uses: azure/setup-kubectl@v3
 
       - name: Add SHORT_SHA
-        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-10`" >> $GITHUB_ENV
 
       - name: Echo SHORT_SHA
         run: echo ${{ env.SHORT_SHA }}
 
-#      - name: Update Deployment Image
-#        env:
-#          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha-deploy.outputs.sha }}
-#        run: |
-#          kubectl set image deployment/${{ vars.SERVICE_NAME }} ${{ vars.SERVICE_NAME }}=$IMAGE_NAME -n services
+      - name: Update Deployment Image
+        env:
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha-deploy.outputs.sha }}
+        run: |
+          kubectl set image deployment/${{ vars.SERVICE_NAME }} ${{ vars.SERVICE_NAME }}=$IMAGE_NAME -n services
