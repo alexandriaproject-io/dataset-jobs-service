@@ -6,15 +6,6 @@ on:
       - main
 
 jobs:
-  setup:
-    runs-on: self-hosted
-    outputs:
-      short_sha: ${{ steps.short_sha.outputs.sha }}
-    steps:
-      - name: Get short SHA
-        id: short_sha
-        run: echo "sha=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
-
   docker-build-and-push:
     runs-on: self-hosted
     steps:
@@ -27,14 +18,14 @@ jobs:
       - name: Build Docker image
         working-directory: .
         env:
-          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ needs.setup.outputs.short_sha }}
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:$(git rev-parse --short $GITHUB_SHA)
         run: |
           docker build --network host -t "$IMAGE_NAME" .
 
       - name: Push Docker image
         working-directory: .
         env:
-          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:$(git rev-parse --short $GITHUB_SHA)
         run: |
           docker push $IMAGE_NAME
 
@@ -47,7 +38,6 @@ jobs:
 
       - name: Update Deployment Image
         env:
-          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ needs.setup.outputs.short_sha }}
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:$(git rev-parse --short $GITHUB_SHA)
         run: |
-          echo $IMAGE_NAME
           kubectl set image deployment/${{ vars.SERVICE_NAME }} ${{ vars.SERVICE_NAME }}=$IMAGE_NAME -n services
