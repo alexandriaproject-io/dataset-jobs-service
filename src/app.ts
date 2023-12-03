@@ -1,10 +1,6 @@
 import { connect } from 'mongoose';
 import { startStatusProvider } from '@niftylius/simple-status-provider';
-import {
-  MONGO_CONNECTION_STRING,
-  STATUS_PORT,
-  NODE_ENV,
-} from '@config';
+import { MONGO_CONNECTION_STRING, STATUS_PORT, NODE_ENV } from '@config';
 import { getHealthState, getLivelinessState, getReadyState, getStatusState } from '@controllers/health';
 
 (async (): Promise<void> => {

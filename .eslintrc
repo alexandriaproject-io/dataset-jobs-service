@@ -23,6 +23,7 @@
     "prettier"
   ],
   "rules": {
+    "@typescript-eslint/no-floating-promises": 0,
     "no-nested-ternary": 0,
     "radix": 0,
     "@typescript-eslint/no-shadow": 0,
