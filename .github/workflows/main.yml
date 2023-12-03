@@ -12,6 +12,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+
+      - name: Confirm git commit SHA output
+        run: echo ${{ env.COMMIT_SHORT_SHA }}
+        
       - name: Get short SHA
         id: short-sha
         run: echo "::set-output name=sha::$(git rev-parse --short $GITHUB_SHA)"
@@ -39,6 +48,15 @@ jobs:
     steps:
       - name: install kubectl
         uses: azure/setup-kubectl@v3
+
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+
+      - name: Confirm git commit SHA output
+        run: echo ${{ env.COMMIT_SHORT_SHA }}
 
       - name: Get short SHA
         id: short-sha-deploy
