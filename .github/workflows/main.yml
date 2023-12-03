@@ -12,23 +12,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set short git commit SHA
-        id: vars
+      - name: Add COMMIT_SHORT_SHA
         run: |
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
 
-      - name: Confirm git commit SHA output
+      - name: Echo COMMIT_SHORT_SHA
         run: echo ${{ env.COMMIT_SHORT_SHA }}
 
       - name: Log in to Docker Hub
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
-      - name: Add SHORT_SHA env property with commit short sha
+      - name: Add SHORT_SHA
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
-      - name: Confirm git commit SHA output v2
-        run: echo ${{ env.COMMIT_SHORT_SHA }}
+      - name: Echo SHORT_SHA
+        run: echo ${{ env.SHORT_SHA }}
 #      - name: Build and push Docker image
 #        working-directory: .
 #        env:
@@ -50,11 +49,11 @@ jobs:
       - name: install kubectl
         uses: azure/setup-kubectl@v3
 
-      - name: Add SHORT_SHA env property with commit short sha
+      - name: Add SHORT_SHA
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
-      - name: Confirm git commit SHA output v2
-        run: echo ${{ env.COMMIT_SHORT_SHA }}
+      - name: Echo SHORT_SHA
+        run: echo ${{ env.SHORT_SHA }}
 
 #      - name: Update Deployment Image
 #        env:
