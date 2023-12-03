@@ -20,27 +20,25 @@ jobs:
 
       - name: Confirm git commit SHA output
         run: echo ${{ env.COMMIT_SHORT_SHA }}
-        
-      - name: Get short SHA
-        id: short-sha
-        run: echo "::set-output name=sha::$(git rev-parse --short $GITHUB_SHA)"
 
       - name: Log in to Docker Hub
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
-      - name: Build and push Docker image
-        working-directory: .
-        env:
-          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
-        run: |
-          docker build --network host -t "$IMAGE_NAME" .
-
-      - name: Docker push
-        working-directory: .
-        env:
-          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
-        run: |
-          docker push $IMAGE_NAME          
+      - name: Add SHORT_SHA env property with commit short sha
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+#      - name: Build and push Docker image
+#        working-directory: .
+#        env:
+#          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ env.COMMIT_SHORT_SHA }}
+#        run: |
+#          docker build --network host -t "$IMAGE_NAME" .
+#
+#      - name: Docker push
+#        working-directory: .
+#        env:
+#          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
+#        run: |
+#          docker push $IMAGE_NAME
 
   deploy:
     needs: docker-build-and-push
@@ -48,6 +46,9 @@ jobs:
     steps:
       - name: install kubectl
         uses: azure/setup-kubectl@v3
+
+      - name: Confirm git commit SHA output
+        run: echo ${{ env.COMMIT_SHORT_SHA }}
 
       - name: Set short git commit SHA
         id: vars
