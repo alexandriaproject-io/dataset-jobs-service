@@ -6,15 +6,20 @@ on:
       - main
 
 jobs:
+  setup:
+    runs-on: self-hosted
+    outputs:
+      short_sha: ${{ steps.short_sha.outputs.sha }}
+    steps:
+      - name: Get short SHA
+        id: short_sha
+        run: echo "sha=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+
   docker-build-and-push:
     runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Get short SHA
-        id: short-sha
-        run: echo "::set-output name=sha::$(git rev-parse --short $GITHUB_SHA)"
 
       - name: Log in to Docker Hub
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
@@ -22,7 +27,7 @@ jobs:
       - name: Build Docker image
         working-directory: .
         env:
-          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ needs.setup.outputs.short_sha }}
         run: |
           docker build --network host -t "$IMAGE_NAME" .
 
@@ -40,13 +45,9 @@ jobs:
       - name: install kubectl
         uses: azure/setup-kubectl@v3
 
-      - name: Get short SHA
-        id: short-sha
-        run: echo "::set-output name=sha::$(git rev-parse --short $GITHUB_SHA)"
-
       - name: Update Deployment Image
         env:
-          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ steps.short-sha.outputs.sha }}
+          IMAGE_NAME: ${{ secrets.DOCKERHUB_USER }}/${{ vars.SERVICE_NAME }}:${{ needs.setup.outputs.short_sha }}
         run: |
           echo $IMAGE_NAME
           kubectl set image deployment/${{ vars.SERVICE_NAME }} ${{ vars.SERVICE_NAME }}=$IMAGE_NAME -n services
