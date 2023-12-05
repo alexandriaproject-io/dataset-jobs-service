@@ -4,6 +4,7 @@ import { DatasetRowInterface } from '@models/datasetrow.model';
 import { JobInterface, JobSource } from '@models/job.model';
 import { GPT_TYPES } from '@repositories/chatgpt/chatgpt.service.interface';
 import { SUPPORTED_TOOLS } from '@system/utils';
+import { RateLimitError } from 'openai/error';
 import systemPromptJson from './prompts/generate_system.json';
 
 const openai = new OpenAI({
@@ -91,7 +92,11 @@ export const generateMessageGpt = async (
   try {
     return await promptGpt(modelName, systemPrompt, promptTemplate, temperature);
   } catch (e) {
-    console.error(e);
+    if (e instanceof RateLimitError) {
+      console.error(`Reached OpenAI rate limit.`);
+    } else {
+      console.error(e);
+    }
     return '';
   }
 };
