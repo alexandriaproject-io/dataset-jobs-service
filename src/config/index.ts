@@ -13,7 +13,7 @@ export const RABBITMQ_PORT: number = parseInt(process.env.RABBITMQ_PORT || '') |
 export const RABBITMQ_JOB_QUEUE_NAME: string = process.env.RABBITMQ_JOB_QUEUE_NAME || '';
 export const RABBITMQ_JOB_QUEUE_PREFETCH: number = parseInt(process.env.RABBITMQ_JOB_QUEUE_PREFETCH || '') || 1;
 export const RABBITMQ_JOB_PAUSE_SECONDS: number = parseInt(process.env.RABBITMQ_JOB_PAUSE_SECONDS || '') || 60;
-
+export const OPENAI_API_KEY: string = process.env.OPENAI_API_KEY || '';
 
 if (!MONGO_CONNECTION_STRING) {
   throw new Error('Service configuration error: Missing MONGO_CONNECTION_STRING');
@@ -40,4 +40,8 @@ if (!RABBITMQ_PASS) {
 }
 if (!RABBITMQ_JOB_QUEUE_NAME) {
   throw new Error('Service configuration error: Missing RABBITMQ_JOB_QUEUE_NAME');
+}
+
+if (!OPENAI_API_KEY) {
+  throw new Error('Service configuration error: Missing OPENAI_API_KEY');
 }

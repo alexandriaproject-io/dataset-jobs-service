@@ -1,0 +1,4 @@
+{
+  "systemMessageTemplate": "Your task is to generate a system message based on the provided conversation snippet.\n\nAnalyze the key elements of the conversation such as the main topic, tone, and any specific queries or instructions. Based on this analysis, craft a system instruction that begins with \"You are a...\". The instruction should be relevant to the conversation's context but flexible enough to be applicable in various similar scenarios.\n",
+  "promptTemplate": "Start of Conversation Snippet\n\n{{source-messages}}\n\nEnd of Conversation Snippet"
+}
