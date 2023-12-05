@@ -23,14 +23,14 @@ const getGenerateSystemFunction = (tool: SUPPORTED_TOOLS): generateFunction | nu
   }
 };
 
-export const saveSystemMessageAndCompleteJob = async (
-  jobRow: JobInterface,
-  datasetRow: DatasetRowInterface
-): Promise<void> => {
-  // Do not Promise.all, we want to make sure the dataset row is updated before completing the job.
-  await datasetRow.save();
+export const completeJob = async (jobRow: JobInterface) => {
   jobRow.completedDate = new Date();
   jobRow.status = JobStatus.Completed;
+  await jobRow.save();
+};
+
+export const errorJob = async (jobRow: JobInterface) => {
+  jobRow.status = JobStatus.Error;
   await jobRow.save();
 };
 
@@ -40,12 +40,14 @@ export const handleGenerateSystemJob = async (
 ): Promise<boolean> => {
   if (datasetRow.systemMessage) {
     console.info('Dataset Row already contains system message');
+    await completeJob(jobRow);
     return true;
   }
 
   const generateSystemFunction: generateFunction | null = getGenerateSystemFunction(jobRow.tool);
   if (!generateSystemFunction) {
     console.error(`Missing generation function for ${jobRow.tool}`);
+    await errorJob(jobRow);
     return false;
   }
 
@@ -56,10 +58,18 @@ export const handleGenerateSystemJob = async (
     });
     if (!initialRow) {
       console.error('Could not find the first in the conversation series!');
+      await errorJob(jobRow);
       return false;
     }
     if (!initialRow.systemMessage) {
       initialRow.systemMessage = await generateSystemFunction(initialRow, jobRow);
+      if (!initialRow.systemMessage) {
+        console.error(
+          `Failed to generate systemMessage for initial row ${initialRow._id.toString()} of job ${jobRow._id.toString()}`
+        );
+        await errorJob(jobRow);
+        return false;
+      }
       await initialRow.save();
     }
     datasetRow.systemMessage = initialRow.systemMessage;
@@ -67,8 +77,14 @@ export const handleGenerateSystemJob = async (
     datasetRow.systemMessage = await generateSystemFunction(datasetRow, jobRow);
   }
 
-  await saveSystemMessageAndCompleteJob(jobRow, datasetRow);
-  return true;
+  if (datasetRow.systemMessage) {
+    await datasetRow.save();
+    await completeJob(jobRow);
+    return true;
+  }
+  console.error(`Failed to generate systemMessage for ${jobRow._id.toString()}`);
+  await errorJob(jobRow);
+  return false;
 };
 
 export const handleGenerateJob = async (jobRow: JobInterface, datasetRow: DatasetRowInterface): Promise<boolean> => {
@@ -77,12 +93,15 @@ export const handleGenerateJob = async (jobRow: JobInterface, datasetRow: Datase
       return handleGenerateSystemJob(jobRow, datasetRow);
     case JobTarget.Messages:
       console.error(`Unknown target ${jobRow?.target}`);
+      await errorJob(jobRow);
       return false;
     case JobTarget.Context:
       console.error(`Unknown target ${jobRow?.target}`);
+      await errorJob(jobRow);
       return false;
     default:
       console.error(`Unknown target ${jobRow?.target}`);
+      await errorJob(jobRow);
       return false;
   }
 };
