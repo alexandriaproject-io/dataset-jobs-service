@@ -1,5 +1,6 @@
 import { ConsumeMessage } from 'amqplib/properties';
-import { JobSource, JobTarget, JobTool, JobType } from '@models/job.model';
+import { JobSource, JobTarget, JobType } from '@models/job.model';
+import { SUPPORTED_TOOLS } from '@system/utils';
 
 export type HandleJobMessage = (
   msg: ConsumeMessage,
@@ -15,5 +16,5 @@ export interface JobDataInterface {
   type: JobType;
   target: JobTarget;
   sources: JobSource[];
-  tool: JobTool;
+  tool: SUPPORTED_TOOLS;
 }

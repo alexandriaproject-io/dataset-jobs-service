@@ -1,21 +1,25 @@
 import { Schema, model, Document, ObjectId } from 'mongoose';
+import { SUPPORTED_TOOLS } from '@system/utils';
 
 export enum JobType {
   Generate = 'generate',
   Expand = 'expand',
   Rephrase = 'rephrase',
+  Unknown = 'unknown',
 }
 
 export enum JobTarget {
   Messages = 'messages',
   System = 'system',
   Context = 'context',
+  Unknown = 'unknown',
 }
 
 export enum JobSource {
   Messages = 'messages',
   System = 'system',
   Context = 'context',
+  Unknown = 'unknown',
 }
 
 export enum JobStatus {
@@ -23,17 +27,6 @@ export enum JobStatus {
   Queued = 'queued',
   Error = 'error',
   Completed = 'completed',
-}
-
-export enum JobTool {
-  Default = 'default',
-  GPT35 = 'gpt-3.5',
-  GPT4 = 'gpt-4',
-  GPT41106Preview = 'gpt-4-1106-preview',
-  Llama7B = 'llama-7b',
-  Llama7BChat = 'llama-7b-chat',
-  Llama13B = 'llama-13b',
-  Llama13BChat = 'llama-13b-chat',
 }
 
 export interface JobInterface extends Document {
@@ -45,7 +38,7 @@ export interface JobInterface extends Document {
   target: JobTarget;
   sources: Array<JobSource>;
   status: JobStatus;
-  tool: JobTool;
+  tool: SUPPORTED_TOOLS;
   completedDate: Date | null;
 }
 
@@ -58,7 +51,7 @@ const jobSchema = new Schema(
     target: { type: String, enum: Object.values(JobTarget) },
     sources: [{ type: String, enum: Object.values(JobSource) }],
     status: { type: String, default: JobStatus.New, enum: Object.values(JobStatus) },
-    tool: { type: String, enum: Object.values(JobTool) },
+    tool: { type: String, enum: Object.values(SUPPORTED_TOOLS) },
     completedDate: { type: Date, default: null, sparse: true },
   },
   {
