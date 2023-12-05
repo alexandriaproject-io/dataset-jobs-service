@@ -25,26 +25,26 @@ export const handleJob = async (
     return;
   }
 
+  let success = false;
   switch (jobData.type) {
     case JobType.Generate:
-      try {
-        const success = await handleGenerateJob(jobRow, datasetRow);
-        if (success) {
-          console.info(
-            `Dataset ${datasetRow.datasetId.toString()} - Job ${jobRow._id.toString()} on ${datasetRow._id.toString()} completed.`
-          );
-          ack();
-        } else {
-          console.info(`Job unsuccessful - jobId:${jobData.jobId}`);
-          await nack();
-        }
-      } catch (e) {
-        console.error(e);
-        await nack();
-      }
+      success = await handleGenerateJob(jobRow, datasetRow);
       break;
+    case JobType.Rephrase:
+    case JobType.Expand:
     default:
       console.error(`Missing handler for ${jobData.type}`);
       await nack();
+      return;
+  }
+
+  if (success) {
+    console.info(
+      `Dataset ${datasetRow.datasetId.toString()} - Job ${jobRow._id.toString()} on ${datasetRow._id.toString()} completed.`
+    );
+    ack();
+  } else {
+    console.info(`Job unsuccessful - jobId:${jobData.jobId}`);
+    await nack();
   }
 };
