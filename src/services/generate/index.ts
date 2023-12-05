@@ -1,1 +1,1 @@
-export * from './generate.service'
+export * from './generate.service';

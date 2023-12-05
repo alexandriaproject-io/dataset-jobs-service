@@ -13,9 +13,9 @@ export enum JobTarget {
 }
 
 export enum JobSource {
-    Messages = 'messages',
-    System = 'system',
-    Context = 'context',
+  Messages = 'messages',
+  System = 'system',
+  Context = 'context',
 }
 
 export enum JobStatus {

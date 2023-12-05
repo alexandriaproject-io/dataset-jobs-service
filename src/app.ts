@@ -2,14 +2,14 @@ import { connect } from 'mongoose';
 import { startStatusProvider } from '@niftylius/simple-status-provider';
 import { MONGO_CONNECTION_STRING, STATUS_PORT, NODE_ENV } from '@config';
 import { getHealthState, getLivelinessState, getReadyState, getStatusState } from '@controllers/health';
-import {rabbitMqConsumer} from "@services/rabbitmq";
-import {handleJob} from "@controllers/job-controller/job.controller";
+import { rabbitMqConsumer } from '@services/rabbitmq';
+import { handleJob } from '@controllers/job-controller/job.controller';
 
 (async (): Promise<void> => {
   try {
     await connect(MONGO_CONNECTION_STRING);
 
-    rabbitMqConsumer.setJobHandle(handleJob)
+    rabbitMqConsumer.setJobHandle(handleJob);
 
     await rabbitMqConsumer.connect();
 
