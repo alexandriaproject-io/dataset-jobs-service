@@ -21,7 +21,9 @@ export class RabbitMQJobConsumer {
   isPaused: boolean = false;
   isConnectionOpen: boolean = false;
   isChannelOpen: boolean = false;
-  handleMessage: HandleJobMessage;
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  handleMessage: HandleJobMessage = async () => undefined;
 
   setJobHandle(handleMessage: HandleJobMessage) {
     this.handleMessage = handleMessage;
