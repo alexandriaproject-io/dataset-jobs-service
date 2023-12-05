@@ -87,7 +87,13 @@ export const generateMessageGpt = async (
     console.error('GPT encountered unknown tool, returning empty string!');
     return '';
   }
-  return promptGpt(modelName, systemPrompt, promptTemplate, temperature);
+
+  try {
+    return await promptGpt(modelName, systemPrompt, promptTemplate, temperature);
+  } catch (e) {
+    console.error(e);
+    return '';
+  }
 };
 
 export const generateSystemMessageGpt = async (

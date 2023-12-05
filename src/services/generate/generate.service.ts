@@ -19,9 +19,19 @@ const getGenerateSystemFunction = (tool: SUPPORTED_TOOLS): generateFunction | nu
     case SUPPORTED_TOOLS.GPT3_5_TURBO:
       return generateSystemMessageGpt;
     default:
-      console.error(`Missing generation function for ${tool}`);
       return null;
   }
+};
+
+export const saveSystemMessageAndCompleteJob = async (
+  jobRow: JobInterface,
+  datasetRow: DatasetRowInterface
+): Promise<void> => {
+  // Do not Promise.all, we want to make sure the dataset row is updated before completing the job.
+  await datasetRow.save();
+  jobRow.completedDate = new Date();
+  jobRow.status = JobStatus.Completed;
+  await jobRow.save();
 };
 
 export const handleGenerateSystemJob = async (
@@ -32,12 +42,13 @@ export const handleGenerateSystemJob = async (
     console.info('Dataset Row already contains system message');
     return true;
   }
+
   const generateSystemFunction: generateFunction | null = getGenerateSystemFunction(jobRow.tool);
   if (!generateSystemFunction) {
+    console.error(`Missing generation function for ${jobRow.tool}`);
     return false;
   }
 
-  let generatedSystemMessage = '';
   if (datasetRow.seriesPosition > 0) {
     const initialRow = await DatasetRowModel.findOne({
       rawJsonId: datasetRow.rawJsonId,
@@ -47,20 +58,16 @@ export const handleGenerateSystemJob = async (
       console.error('Could not find the first in the conversation series!');
       return false;
     }
-    generatedSystemMessage = initialRow.systemMessage;
-    if (!generatedSystemMessage) {
-      generatedSystemMessage = await generateSystemFunction(initialRow, jobRow);
+    if (!initialRow.systemMessage) {
+      initialRow.systemMessage = await generateSystemFunction(initialRow, jobRow);
+      await initialRow.save();
     }
+    datasetRow.systemMessage = initialRow.systemMessage;
   } else {
-    generatedSystemMessage = await generateSystemFunction(datasetRow, jobRow);
+    datasetRow.systemMessage = await generateSystemFunction(datasetRow, jobRow);
   }
 
-  datasetRow.systemMessage = generatedSystemMessage;
-  await datasetRow.save();
-  jobRow.completedDate = new Date();
-  jobRow.status = JobStatus.Completed;
-  await jobRow.save();
-
+  await saveSystemMessageAndCompleteJob(jobRow, datasetRow);
   return true;
 };
 
